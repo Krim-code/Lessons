@@ -78,5 +78,33 @@ margin:0;
     background: #FF9C9C;
 }
 
+ul.list-posts {
 
+margin:0;
+padding:0;
+max-width:600px;
+}
+ul.list-posts li{
+margin:20px 0 0 0;
+border: 1px solid #eee;
 
+}
+ul.list-posts .title{
+    margin:0px;
+    padding:5px;
+    background: #eee;
+    color:red;
+    text-decoration: none;
+}
+ul.list-posts .title a{
+    color: blue;
+    text-decoration: none;
+}
+ul.list-posts .title a:hover{
+    color: #43437e ;
+    text-decoration: none;
+}
+ul.list-posts .annonce{
+    margin:0px;
+    padding:10px 5px 10px 5px;
+}

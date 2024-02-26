@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from flask import Flask, render_template, request, g, flash
+from flask import Flask, render_template, request, g, flash , abort
 from usefull.FDataBase import FDataBase
 
 app = Flask(__name__)
@@ -26,7 +26,7 @@ def create_db():
 def index():
     db = get_db()
     dbase = FDataBase(db)
-    return render_template("index.html", menu = dbase.getMenu())
+    return render_template("index.html", menu = dbase.getMenu(), posts = dbase.getPostAnonce())
 
 @app.route("/add_post", methods = ["GET","POST"])
 def addPost():
@@ -35,7 +35,7 @@ def addPost():
 
    if request.method == "POST":
        if len(request.form['name']) > 4 and len(request.form['post']) > 10:
-           res = dbase.addPost(request.form['name'],request.form['post'])
+           res = dbase.addPost(request.form['name'],request.form['post'],request.form['url'])
            if not res:
                flash("Ошибка добавления", category="error")
            else:
@@ -45,11 +45,22 @@ def addPost():
 
    return render_template("add_post.html", menu = dbase.getMenu(), title="Добавление статьи")
 
+@app.route("/post/<alias>")
+def showPost(alias):
+    db = get_db()
+    dbase = FDataBase(db)
+    title, post = dbase.getPost(alias)
+    if not title:
+        abort(404)
+    return render_template("post.html",menu = dbase.getMenu(), title=title, post=post)
 def get_db():
     if not hasattr(g, "link_db"):
         g.link_db = connect_db()
     return g.link_db
 
+@app.errorhandler(404)
+def pageNotFound(error):
+    return render_template("page404.html", title="Страница не найдена")
 
 @app.teardown_appcontext
 def close_db(error):
