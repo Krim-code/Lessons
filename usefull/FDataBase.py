@@ -62,3 +62,19 @@ class FDataBase:
             print(f"Ошибка при получении постов из БД {e}")
 
         return []
+
+    def addUser(self,name,email,hpsw):
+        try:
+            self.__cur.execute(f"SELECT COUNT() as `count` FROM users WHERE email like '{email}'")
+            res = self.__cur.fetchone()
+            print(res)
+            if res['count'] > 0:
+                print("Такой пользователь уже есть")
+                return False
+            tm = math.floor(time.time())
+            self.__cur.execute("INSERT INTO users VALUES(NULL,?,?,?,?)",(name,email,hpsw,tm))
+            self.__db.commit()
+        except sqlite3.Error as e:
+            print("Ошибка добавления в бд"+ str(e))
+            return False
+        return True
