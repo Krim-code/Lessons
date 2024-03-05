@@ -2,7 +2,9 @@ import sqlite3
 import os
 from flask import Flask, render_template, request, g, flash, abort, session, redirect, url_for
 from usefull.FDataBase import FDataBase
+from usefull.UserLogin import UserLogin
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 app = Flask(__name__)
 app.config.update(dict(DATABASE=os.path.join(app.root_path, 'test.db')))
@@ -10,6 +12,10 @@ app.config["SECRET_KEY"] = "hoirjghojropgjehueEFGEOKOPje"
 
 dbase = None
 
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+login_manager.login_message = "Авторизируйтесь для доступа закрытым страницам"
+login_manager.login_message_category = "success"
 
 @app.before_request
 def before_request():
@@ -17,6 +23,11 @@ def before_request():
     db = get_db()
     dbase = FDataBase(db)
 
+
+@login_manager.user_loader
+def load_user(user_id):
+    print("load_user")
+    return UserLogin().fromDB(user_id,dbase)
 
 def connect_db():
     conn = sqlite3.connect(app.config["DATABASE"])
@@ -31,8 +42,20 @@ def create_db():
     db.commit()
     db.close()
 
-@app.route("/login")
+@app.route("/login" ,methods=["POST","GET"])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('profile'))
+    if request.method == "POST":
+
+        user = dbase.getUserByEmail(request.form['email'])
+        if user and check_password_hash(user["psw"], request.form["psw"]):
+            userlogin = UserLogin().create(user)
+            login_user(userlogin)
+
+            return redirect(request.args.get("next") or url_for("profile"))
+        flash("Неверные данные - логин ")
+
     return render_template("login.html",menu=dbase.getMenu(), title = "Авторизация")
 
 @app.route("/register", methods=["POST","GET"])
@@ -78,6 +101,7 @@ def addPost():
 
 
 @app.route("/post/<alias>")
+@login_required
 def showPost(alias):
     title, post = dbase.getPost(alias)
     if not title:
@@ -89,6 +113,21 @@ def get_db():
     if not hasattr(g, "link_db"):
         g.link_db = connect_db()
     return g.link_db
+
+@app.route('/profile')
+@login_required
+def profile():
+    return f"""
+            <a href="{url_for('logout')}">Выйти из профиля</a>
+            user info: {current_user.get_id()}<br>
+            name user: {current_user.getName()}
+"""
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    flash("Вы вышли из аккаунта", "success")
+    return redirect(url_for("login"))
 
 
 @app.errorhandler(404)
