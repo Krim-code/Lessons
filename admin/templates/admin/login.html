@@ -1,0 +1,73 @@
+{% extends 'admin/base.html' %}
+
+{% block content%}
+{{super()}}
+<style>
+   
+    :root{
+        --main-bg:#e91e63;
+    }
+    body{ background-color: var(--main-bg);}
+    .main-bg{
+        background-color: var(--main-bg);
+    }
+
+    input:focus, button:focus{
+        border: 1px solid var(--main-bg) !important;
+        box-shadow: none !important;
+    }
+    .centered {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh; /* Adjust as needed */
+    }
+    .card-login{
+    max-width : 600px;
+    width: 80%;
+    }
+
+</style>
+
+<div class="container">
+    
+
+    <div class="row justify-content-center">
+
+        <div class="centered">
+
+            <div class="card shadow card-login">
+                <div class="card-title text-center border-bottom">
+                    <h2 class="p-3">Login</h2>
+                </div>
+                <div class="card-body">
+                    <form action="" method="post">
+                        <div class="mb-4">
+                            <label for="username" class = "form-label">Username</label>
+                            <input type="text" class="form-control" name="username" id="username"/>
+                        </div>
+                        <div class="mb-4">
+                            <label for="psw" class = "form-label">Password</label>
+                            <input type="password" class="form-control" name="psw" id="psw"/>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn main-bg text-light">Login</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+
+
+        </div>
+        
+
+
+
+    </div>
+   
+
+</div>
+{%endblock%}
+
